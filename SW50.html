@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guess who?</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 24px;
+    background: #042b5e;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+
+  /* ---------- Карточка ---------- */
+  .card {
+    width: 150px;
+    padding: 10px;
+    background: #cbf4ce;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color .25s ease, box-shadow .2s ease, transform .1s ease;
+  }
+
+  .card:hover  { box-shadow: 0 6px 18px rgba(0, 0, 0, .18); }
+  .card:active { transform: scale(.98); }
+
+  .card:focus-visible {
+    outline: 3px solid #4a90e2;
+    outline-offset: 3px;
+  }
+
+  /* ---------- Квадратная картинка ---------- */
+  .card__img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;      /* всегда квадрат */
+    border-radius: 8px;
+    overflow: hidden;          /* обрезаем "вылезающие" линии креста */
+    background: #dfe3e8;
+  }
+
+  .card__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter .25s ease;
+  }
+
+  /* ---------- Крест (две диагонали) ---------- */
+  .card__img-wrap::before,
+  .card__img-wrap::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* длина линии = диагональ квадрата (100% * √2 ≈ 141.42%) */
+    width: 141.42%;
+    height: 8px;
+    margin: 0;
+    background: #981f1d;
+    border-radius: 3px;
+    opacity: 0;
+    transform-origin: center;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+
+  .card__img-wrap::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .card__img-wrap::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+  /* ---------- Подпись ---------- */
+  .card__caption {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.3;
+    text-align: center;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color .25s ease;
+  }
+
+  /* ---------- Состояние "перечёркнуто" ---------- */
+  .card.is-crossed {
+    background: #d3d3d3;
+  }
+
+  /* фильтр вешаем на саму картинку, иначе он обесцветит и красный крест */
+  .card.is-crossed .card__img {
+    filter: grayscale(1) brightness(.9);
+  }
+
+  .card.is-crossed .card__img-wrap::before,
+  .card.is-crossed .card__img-wrap::after {
+    opacity: 1;
+  }
+
+  .card.is-crossed .card__caption {
+    color: #777;
+  }
+</style>
+</head>
+
+<body>
+
+  <!-- 1 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/1/1.jpg">
+    </div>
+    <div class="card__caption">Дарт Реван</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/1/2.jpg">
+    </div>
+    <div class="card__caption">Дарт Талон</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/1/3.jpg">
+    </div>
+    <div class="card__caption">Дарт Бейн</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/1/4.jpg">
+    </div>
+    <div class="card__caption">Дарт Крейт</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/1/5.jpg">
+    </div>
+    <div class="card__caption">Дарт Трея</div>
+  </div>
+
+  <!-- 2 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/2/1.jpg">
+    </div>
+    <div class="card__caption">Мэй / Оша</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/2/2.jpg">
+    </div>
+    <div class="card__caption">Кимир</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/2/3.jpg">
+    </div>
+    <div class="card__caption">Сол</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/2/4.jpg">
+    </div>
+    <div class="card__caption">Вернестра Роу</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/2/5.jpg">
+    </div>
+    <div class="card__caption">Келнакка</div>
+  </div>
+
+  <!-- 3 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/1.jpeg">
+    </div>
+    <div class="card__caption">Дарт Плэгас</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/2.jpg">
+    </div>
+    <div class="card__caption">Дарт Мол</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/3.jpeg">
+    </div>
+    <div class="card__caption">Ки Ади Мунди</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/4.jpeg">
+    </div>
+    <div class="card__caption">Ассадж Вентресс</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/5.jpeg">
+    </div>
+    <div class="card__caption">Граф Дуку</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/6.jpg">
+    </div>
+    <div class="card__caption">Эйла Секура</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/7.jpeg">
+    </div>
+    <div class="card__caption">Мейс Винду</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/8.jpeg">
+    </div>
+    <div class="card__caption">Пло Кун</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/9.jpeg">
+    </div>
+    <div class="card__caption">Уотто</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/10.jpeg">
+    </div>
+    <div class="card__caption">Сибульба</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/11.jpg">
+    </div>
+    <div class="card__caption">Джанго Фетт</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/12.jpeg">
+    </div>
+    <div class="card__caption">Бейл Органа</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/13.jpg">
+    </div>
+    <div class="card__caption">Оби-Ван Кеноби</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/14.jpeg">
+    </div>
+    <div class="card__caption">Энакин Скайуокер</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/3/15.jpeg">
+    </div>
+    <div class="card__caption">Падме Амидала</div>
+  </div>
+
+  <!-- 4 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/1.jpg">
+    </div>
+    <div class="card__caption">Бэйз Мальбус</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/2.jpg">
+    </div>
+    <div class="card__caption">Бикс Калин</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/3.jpg">
+    </div>
+    <div class="card__caption">Орсон Кренник</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/4.jpg">
+    </div>
+    <div class="card__caption">Кассиан Андор</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/5.jpg">
+    </div>
+    <div class="card__caption">Джин Эрсо</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/6.jpeg">
+    </div>
+    <div class="card__caption">Дедра Миро</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/7.jpeg">
+    </div>
+    <div class="card__caption">Сирил Карн</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/8.jpeg">
+    </div>
+    <div class="card__caption">Со Геррера</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/9.jpeg">
+    </div>
+    <div class="card__caption">Чиррут Имве</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/4/10.jpeg">
+    </div>
+    <div class="card__caption">K‑2SO</div>
+  </div>
+
+  <!-- 5 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/1.jpg">
+    </div>
+    <div class="card__caption">Джабба Хатт</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/2.jpeg">
+    </div>
+    <div class="card__caption">Боба Фетт</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/3.jpg">
+    </div>
+    <div class="card__caption">Палпатин</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/4.jpg">
+    </div>
+    <div class="card__caption">Дарт Вейдер</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/5.jpeg">
+    </div>
+    <div class="card__caption">Уилхафф Таркин</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/6.png">
+    </div>
+    <div class="card__caption">Чубакка</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/7.jpg">
+    </div>
+    <div class="card__caption">Лея Органа</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/8.jpg">
+    </div>
+    <div class="card__caption">Хан Соло</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/9.jpeg">
+    </div>
+    <div class="card__caption">Люк Скайуокер</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/10.jpeg">
+    </div>
+    <div class="card__caption">Лэндо Калриссиан</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/11.jpeg">
+    </div>
+    <div class="card__caption">С-3РО</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/12.jpg">
+    </div>
+    <div class="card__caption">R2D2</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/13.jpeg">
+    </div>
+    <div class="card__caption">Йода</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/14.jpeg">
+    </div>
+    <div class="card__caption">Мон Мотма</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/5/15.jpeg">
+    </div>
+    <div class="card__caption">Джиал Акбар</div>
+  </div>
+
+  <!-- 6 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/1.png">
+    </div>
+    <div class="card__caption">Гранд Инквизитор</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/2.jpg">
+    </div>
+    <div class="card__caption">Рева</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/3.jpg">
+    </div>
+    <div class="card__caption">Эзра Бриджер</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/4.jpg">
+    </div>
+    <div class="card__caption">Кенан Джарус</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/5.jpeg">
+    </div>
+    <div class="card__caption">Гера Синдула</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/6.jpeg">
+    </div>
+    <div class="card__caption">Зеб Оррелиос</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/7.jpg">
+    </div>
+    <div class="card__caption">Сабина Врен</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/8.jpg">
+    </div>
+    <div class="card__caption">Асока Тано</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/9.jpeg">
+    </div>
+    <div class="card__caption">Александр Каллус</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/10.jpeg">
+    </div>
+    <div class="card__caption">Аринда Прайс</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/11.jpg">
+    </div>
+    <div class="card__caption">Грогу</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/12.jpeg">
+    </div>
+    <div class="card__caption">Дин Джарин</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/6/13.jpg">
+    </div>
+    <div class="card__caption">Траппер Вульф</div>
+  </div>
+
+  <!-- 7 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/1.jpg">
+    </div>
+    <div class="card__caption">Мара Джейд</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/2.jpg">
+    </div>
+    <div class="card__caption">Траун</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/3.jpg">
+    </div>
+    <div class="card__caption">Рукх</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/4.jpeg">
+    </div>
+    <div class="card__caption">Джорус К'баот</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/5.jpeg">
+    </div>
+    <div class="card__caption">Нусо Эсва</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/6.jpeg">
+    </div>
+    <div class="card__caption">Гилад Пиллаэон</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/7.jpeg">
+    </div>
+    <div class="card__caption">Гарм Бел Иблис</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/8.jpeg">
+    </div>
+    <div class="card__caption">Борск Фел'лия</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/9.jpg">
+    </div>
+    <div class="card__caption">Тэлон Каррде</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/10.jpg">
+    </div>
+    <div class="card__caption">Жорж Кар'дас</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/11.jpg">
+    </div>
+    <div class="card__caption">Тенениэль Дьо</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/12.jpg">
+    </div>
+    <div class="card__caption">Принц Изольдер</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/13.jpeg">
+    </div>
+    <div class="card__caption">Джейсен Соло</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/14.jpeg">
+    </div>
+    <div class="card__caption">Джейна Соло</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/15.jpeg">
+    </div>
+    <div class="card__caption">Энакин Соло</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/16.jpeg">
+    </div>
+    <div class="card__caption">Флим</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/17.jpeg">
+    </div>
+    <div class="card__caption">Ном Анор</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/18.jpg">
+    </div>
+    <div class="card__caption">Йомин Кар</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/19.jpg">
+    </div>
+    <div class="card__caption">Илай Венто</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/7/20.jpeg">
+    </div>
+    <div class="card__caption">Ар'алани</div>
+  </div>
+
+  <!-- 8 -->
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/1.jpg">
+    </div>
+    <div class="card__caption">Рей</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/2.jpeg">
+    </div>
+    <div class="card__caption">По Дэмерон</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/3.jpg">
+    </div>
+    <div class="card__caption">Фин</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/4.jpeg">
+    </div>
+    <div class="card__caption">Кайло Рен</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/5.jpg">
+    </div>
+    <div class="card__caption">Армитаж Хакс</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/6.jpg">
+    </div>
+    <div class="card__caption">Фазма</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/7.jpg">
+    </div>
+    <div class="card__caption">ВВ-8</div>
+  </div>
+
+  <div class="card" id="card" role="button" tabindex="0" aria-pressed="false">
+    <div class="card__img-wrap">
+      <img class="card__img" src="images/8/8.jpeg">
+    </div>
+    <div class="card__caption">Сноук</div>
+  </div>
+
+
+<script>
+  (function () {
+    document.querySelectorAll('.card').forEach(function (card) {
+
+      function toggleCard() {
+        const crossed = card.classList.toggle('is-crossed');
+        card.setAttribute('aria-pressed', String(crossed));
+      }
+
+      card.addEventListener('click', toggleCard);
+
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleCard();
+        }
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
